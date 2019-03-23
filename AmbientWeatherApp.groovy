@@ -1,143 +1,113 @@
-definition(name: "Ambient Weather API", namespace: "CordMaster", author: "Alden Howard", description: "A simple api for providing ambient weather access", iconUrl: "", iconX2Url: "");
-
-preferences {
-    page(name: "page1", title: "Log In", nextPage: "page2", uninstall: true) {
-        section {
-            input(name: "applicationKey", title: "Application Key", type: "text", required: true);
-            input(name: "apiKey", title: "API Key", type: "text", required: true);
-        }
+metadata {
+    definition(name: "Ambient Weather Device", namespace: "CordMaster", author: "Alden Howard") {
+        capability "Temperature Measurement"
+        capability "Relative Humidity Measurement"
+        capability "Pressure Measurement"
+        capability "Illuminance Measurement"
+        capability "Refresh"
+        capability "Sensor"
+		capability "Actuator"
+        
+        //command "setTemperature", ["number"]
+        //command "setHumidity", ["number"]
+        //command "setDewPoint", ["number"]
+        //command "setPressure", ["number"]
+        //command "setRealFeel", ["number"]
+        //command "setDailyRain", ["number"]
+        
+		//Current Conditions
+        attribute "weather", "string"
+        attribute "weatherIcon", "string"
+        attribute "dewPoint", "number"
+        attribute "comfort", "number"
+        attribute "feelsLike", "number"
+		attribute "pressure", "string"
+		
+		//Precipitation
+        attribute "precip_today", "number"
+		attribute "precip_1hr", "number"
+		
+        
+		//Wind
+		attribute "wind", "number"
+        attribute "wind_gust", "number"
+        attribute "wind_degree", "number"
+        attribute "wind_dir", "string"
+		attribute "wind_direction", "string"
+		
+		//Light
+		attribute "solarradiation", "number"
+        attribute "uv", "number"
     }
-    
-    page(name: "page2");
-    page(name: "page3");
 }
 
-def page2() {
-    def stations = [];
-    def stationMacs = [];
-    try {
-        stations = getStations();
-        
-        stations.each { stationMacs << it.macAddress };
-    } catch(groovyx.net.http.HttpResponseException e) {
-        //then unauthorized
-        return dynamicPage(name: "page2", title: "Error", nextPage: "page1", uninstall: true) {
-            section {
-                paragraph("There was an error authorizing you. Please try again.");
-            }
-        }
+def refresh() {
+	parent.fetchNewWeather(); 
+}
+
+def setWeather(weather){
+	log.debug("Weather: " + weather);
+	
+	//Set temperature
+	sendEvent(name: "temperature", value: weather.tempf, unit: '°F', isStateChange: true);
+	
+	//Set Humidity
+	sendEvent(name: "humidity", value: weather.humidity, unit: '%', isStateChange: true);
+    
+	//Set DewPoint
+	sendEvent(name: "dewPoint", value: weather.dewPoint, unit:'°F', isStateChange: true);
+	
+	//Set Comfort Level 
+	float temp = 0.0;
+   
+	temp = (weather.dewPoint - 35);
+    if (temp <= 0) {
+        temp = 0.0;
+    } else if (temp >= 40.0) {
+        temp = 100.0;
+    } else {
+        temp = (temp/40.0)*100.0;
     }
+    	temp = temp.round(1);
+    	sendEvent(name: "comfort", value: temp, isStateChange: true);
+	
+	//Set Barometric Pressure
+	sendEvent(name: "pressure", value: weather.baromrelin, unit: 'in', isStateChange: true);
+	
+	//Set Feels Like Temperature
+	sendEvent(name: "feelsLike", value: weather.feelsLike, unit: '°F', isStateChange: true);
     
-   	log.debug("Got stations: " + stations);
-    
-	return dynamicPage(name: "page2", title: "Select Station", nextPage: "page3", uninstall: true) {
-		section {
-			input(name: "station", title: "Station", type: "enum", options: stationMacs, required: true);
-            input(name: "refreshInterval", title: "Refresh Interval (in minutes)", type: "number", range: "1..3600", defaultValue: 1, required: true);
-		}
+    	//Rain
+	sendEvent(name: "precip_today", value: weather.dailyrainin, unit: 'in', isStateChange: true);  
+	sendEvent(name: "precip_1hr", value: weather.hourlyrainin, unit: 'in', isStateChange: true); 
+	
+	//Wind
+	sendEvent(name: "wind", value: weather.windspeedmph, unit: 'mph', isStateChange: true);
+	sendEvent(name: "wind_gust", value: weather.windgustmph, unit: 'mph', isStateChange: true);
+	sendEvent(name: "wind_degree", value: weather.winddir, unit: '°', isStateChange: true);
+	
+	temp = weather.winddir
+	if (temp < 22.5) { 		sendEvent(name:  "wind_direction", value: "North", isStateChange: true);
+					            sendEvent(name:  "wind_dir", value: "N", isStateChange: true);
+	} else if (temp < 67.5) {  sendEvent(name:  "wind_direction", value: "Northeast", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "NE", isStateChange: true);
+	} else if (temp < 112.5) {  sendEvent(name: "wind_direction", value: "East", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "E", isStateChange: true);
+	} else if (temp < 157.5) {  sendEvent(name: "wind_direction", value: "Southeast", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "SE", isStateChange: true);
+	} else if (temp < 202.5) {  sendEvent(name: "wind_direction", value: "South", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "S", isStateChange: true);
+	} else if (temp < 247.5) {  sendEvent(name: "wind_direction", value: "Southwest", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "SW", isStateChange: true);
+	} else if (temp < 292.5) {  sendEvent(name: "wind_direction", value: "West", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "W", isStateChange: true);
+	} else if (temp < 337.5) {  sendEvent(name: "wind_direction", value: "Northwest", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "NW", isStateChange: true);
+	} else 					 {  sendEvent(name:  "wind_direction", value: "North", isStateChange: true);
+					    		sendEvent(name:  "wind_dir", value: "N", isStateChange: true);
 	}
-}
-
-def page3() {
-    dynamicPage(name: "page3", title: "Confirm Settings", install: true, uninstall: true) {
-        section {
-            paragraph("Selected station: $station");
-            paragraph("Refresh interval: $refreshInterval minute(s)");
-        }
-        
-        section {
-            paragraph("Press done to finish");
-        }
-    }
-}
-
-//lifecycle functions
-def installed() {
-    log.debug("Installed");
-    
-    addDevice();
-    
-    initialize();
-    
-    runEvery5Minutes(fetchNewWeather);
-}
-
-def updated() {
-    log.debug("Updated");
-    
-    unsubscribe();
-    unschedule();
-    installed();
-    initialize(); 
-}
-
-def initialize() {
-    fetchNewWeather();
-    
-    //chron schedule, refreshInterval is int
-    def m = refreshInterval;
-    def h = Math.floor(m / 60);
-    m -= h * 60;
-    
-    m = m == 0 ? "*" : "0/" + m.toInteger();
-    h = h == 0 ? "*" : "0/" + h.toInteger();
-    
-    log.debug("Set CHRON schedule with m: $m and h: $h");
-    
-    schedule("0 $m $h * * ? *", fetchNewWeather);
-}
-
-//children
-def addDevice() {
 	
-    addChildDevice("CordMaster", "Ambient Weather Device", "AWTILE-$station", null, [completedSetup: true]);
-}
-
-//fetch functions
-def getStations() throws groovyx.net.http.HttpResponseException {
-    def data = [];
-    
-    def params = [
-        uri: "https://api.ambientweather.net/",
-        path: "/v1/devices",
-        query: [applicationKey: applicationKey, apiKey: apiKey]
-    ];
-    
-    requestData("/v1/devices", [applicationKey: applicationKey, apiKey: apiKey]) { response ->
-        data = response.data;
-    };
-        
-    return data;
-}
-
-def getWeather() throws groovyx.net.http.HttpResponseException {
-    def data = [];
-    
-    requestData("/v1/devices/$station", [applicationKey: applicationKey, apiKey: apiKey, limit: 1]) { response ->
-        data = response.data;
-    };
-        
-	return data[0];
-}
-
-def requestData(path, query, code) {
-    def params = [
-        uri: "https://api.ambientweather.net/",
-        path: path,
-        query: query
-    ];
-    
-    httpGet(params) { response ->
-        code(response);
-    };
-}
-
-//loop
-def fetchNewWeather() {
-        
-    def weather = getWeather();
-    
-    //log.debug("Weather: " + weather);
-	
-	childDevices[0].setWeather(weather);
+	//UV and Light
+	sendEvent(name: "solarradiation", value: weather.solarradiation, isStateChange: true);
+    	sendEvent(name: "uv", value: weather.uv, isStateChange: true);
 }
