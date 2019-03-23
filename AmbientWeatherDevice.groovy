@@ -8,13 +8,6 @@ metadata {
         capability "Sensor"
 		capability "Actuator"
         
-        //command "setTemperature", ["number"]
-        //command "setHumidity", ["number"]
-        //command "setDewPoint", ["number"]
-        //command "setPressure", ["number"]
-        //command "setRealFeel", ["number"]
-        //command "setDailyRain", ["number"]
-        
 		//Current Conditions
         attribute "weather", "string"
         attribute "weatherIcon", "string"
@@ -39,6 +32,11 @@ metadata {
 		attribute "solarradiation", "number"
         attribute "uv", "number"
     }
+	preferences {
+        section("Preferences") {
+            input "showLogs", "bool", required: false, title: "Show Debug Logs?", defaultValue: false
+        }
+    }
 }
 
 def refresh() {
@@ -46,7 +44,7 @@ def refresh() {
 }
 
 def setWeather(weather){
-	log.debug("Weather: " + weather);
+	logger("debug", "Weather: "+weather);
 	
 	//Set temperature
 	sendEvent(name: "temperature", value: weather.tempf, unit: '°F', isStateChange: true);
@@ -110,8 +108,12 @@ def setWeather(weather){
 	//UV and Light
 	sendEvent(name: "solarradiation", value: weather.solarradiation, isStateChange: true);
 	sendEvent(name: "illuminance", value: weather.solarradiation, isStateChange: true);
-	sendEvent(name: "uv", value: weather.uv, isStateChange: true);
-	
+        sendEvent(name: "uv", value: weather.uv, isStateChange: true);
 }
 
+private logger(type, msg){
+	 if(type && msg && settings?.showLogs) {
+        log."${type}" "${msg}"
+    }
+}
 	
