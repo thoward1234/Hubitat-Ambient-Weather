@@ -33,6 +33,7 @@ def page2() {
 	return dynamicPage(name: "page2", title: "Select Station", nextPage: "page3", uninstall: true) {
 		section {
 			input(name: "station", title: "Station", type: "enum", options: stationMacs, required: true);
+            input(name: "refreshInterval", title: "Refresh Interval (in minutes)", type: "number", range: "1..3600", defaultValue: 1, required: true);
 		}
 	}
 }
@@ -41,6 +42,7 @@ def page3() {
     dynamicPage(name: "page3", title: "Confirm Settings", install: true, uninstall: true) {
         section {
             paragraph("Selected station: $station");
+            paragraph("Refresh interval: $refreshInterval minute(s)");
         }
         
         section {
@@ -64,16 +66,31 @@ def updated() {
     log.debug("Updated");
     
     unsubscribe();
+    unschedule();
+    installed();
     initialize(); 
 }
 
 def initialize() {
     fetchNewWeather();
+    
+    //chron schedule, refreshInterval is int
+    def m = refreshInterval;
+    def h = Math.floor(m / 60);
+    m -= h * 60;
+    
+    m = m == 0 ? "*" : "0/" + m.toInteger();
+    h = h == 0 ? "*" : "0/" + h.toInteger();
+    
+    log.debug("Set CHRON schedule with m: $m and h: $h");
+    
+    schedule("0 $m $h * * ? *", fetchNewWeather);
 }
 
 //children
 def addDevice() {
-    addChildDevice("CordMaster", "Ambient Weather Tile", "AWTILE-$station", null, [completedSetup: true]);
+	
+    addChildDevice("CordMaster", "Ambient Weather Device", "AWTILE-$station", null, [completedSetup: true]);
 }
 
 //fetch functions
@@ -117,12 +134,10 @@ def requestData(path, query, code) {
 
 //loop
 def fetchNewWeather() {
-    log.debug("Getting new weather...");
-    
+        
     def weather = getWeather();
     
-    log.debug("Weather: " + weather);
-    
-    childDevices[0].setTemperature(weather.tempf);
-    childDevices[0].setHumidity(weather.humidity);
+    //log.debug("Weather: " + weather);
+	
+	childDevices[0].setWeather(weather);
 }
