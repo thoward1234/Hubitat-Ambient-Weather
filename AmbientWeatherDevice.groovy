@@ -109,7 +109,8 @@ def setWeather(weather){
 	
 	//UV and Light
 	sendEvent(name: "solarradiation", value: weather.solarradiation, isStateChange: true);
-    sendEvent(name: "uv", value: weather.uv, isStateChange: true);
+	sendEvent(name: "illuminance", value: weather.solarradiation, isStateChange: true);
+	sendEvent(name: "uv", value: weather.uv, isStateChange: true);
 	
 }
 
