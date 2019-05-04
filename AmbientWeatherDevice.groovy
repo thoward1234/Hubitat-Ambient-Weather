@@ -1,19 +1,19 @@
 metadata {
     definition(name: "Ambient Weather Device", namespace: "CordMaster", author: "Alden Howard") {
-        capability "Temperature Measurement"
-        capability "Relative Humidity Measurement"
-        capability "Pressure Measurement"
-        capability "Illuminance Measurement"
-        capability "Refresh"
-        capability "Sensor"
+	capability "Temperature Measurement"
+	capability "Relative Humidity Measurement"
+	capability "Pressure Measurement"
+	capability "Illuminance Measurement"
+	capability "Refresh"
+	capability "Sensor"
 	capability "Actuator"
         
 	//Current Conditions
-        attribute "weather", "string"
-        attribute "weatherIcon", "string"
-        attribute "dewPoint", "number"
-        attribute "comfort", "number"
-        attribute "feelsLike", "number"
+	attribute "weather", "string"
+	attribute "weatherIcon", "string"
+	attribute "dewPoint", "number"
+	attribute "comfort", "number"
+	attribute "feelsLike", "number"
 	attribute "pressure", "string"
 		
 	//Indoor Conditions
@@ -22,30 +22,30 @@ metadata {
 	attribute "baromabsin", "number"
 		
 	//Precipitation
-        attribute "precip_today", "number"
+	attribute "precip_today", "number"
 	attribute "precip_1hr", "number"
 	attribute "hourlyrainin", "number"
 	attribute "weeklyrainin", "number"
 	attribute "monthlyrainin", "number"
-        attribute "totalrainin", "number"
+	attribute "totalrainin", "number"
 	attribute "lastRain", "string"
                 
 	//Wind
 	attribute "wind", "number"
-        attribute "wind_gust", "number"
-        attribute "maxdailygust", "number"
-        attribute "wind_degree", "number"
-        attribute "wind_dir", "string"
+	attribute "wind_gust", "number"
+	attribute "maxdailygust", "number"
+	attribute "wind_degree", "number"
+	attribute "wind_dir", "string"
 	attribute "wind_direction", "string"
 		
 	//Light
 	attribute "solarradiation", "number"
-        attribute "uv", "number"
+	attribute "uv", "number"
     }
 
 	preferences {
-        section("Preferences") {
-            input "showLogs", "bool", required: false, title: "Show Debug Logs?", defaultValue: false
+	section("Preferences") {
+	input "showLogs", "bool", required: false, title: "Show Debug Logs?", defaultValue: false
         }
     }
 }
