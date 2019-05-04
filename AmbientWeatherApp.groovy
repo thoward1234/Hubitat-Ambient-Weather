@@ -82,7 +82,7 @@ def initialize() {
     m = m == 0 ? "*" : "0/" + m.toInteger();
     h = h == 0 ? "*" : "0/" + h.toInteger();
     
-    log.debug("Set CHRON schedule with m: $m and h: $h");
+    log.debug("CRON schedule with m: $m and h: $h");
     
     schedule("0 $m $h * * ? *", fetchNewWeather);
 }
