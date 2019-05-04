@@ -18,8 +18,8 @@ metadata {
 		
 	//Indoor Conditions
 	attribute "humidityin", "string"
-	attribute "tempinf", "string"
-	attribute "baromabsin", "number"
+	attribute "temperaturein", "string"
+	attribute "baromabsin", "string"
 		
 	//Precipitation
 	attribute "precip_today", "number"
@@ -61,13 +61,13 @@ def setWeather(weather){
 	sendEvent(name: "temperature", value: weather.tempf, unit: '°F', isStateChange: true);
 	
 	//Set Indoor temperature
-	sendEvent(name: "indoor_temperature", value: weather.tempinf, unit: '°F', isStateChange: true);
+	sendEvent(name: "temperaturein", value: weather.tempinf, unit: '°F', isStateChange: true);
 
 	//Set Humidity
 	sendEvent(name: "humidity", value: weather.humidity, unit: '%', isStateChange: true);
     
 	//Set Indoor Humidity
-	sendEvent(name: "indoor_humidity", value: weather.humidityin, unit: '%', isStateChange: true);
+	sendEvent(name: "humidityin", value: weather.humidityin, unit: '%', isStateChange: true);
     
 	//Set DewPoint
 	sendEvent(name: "dewPoint", value: weather.dewPoint, unit:'°F', isStateChange: true);
@@ -98,10 +98,10 @@ def setWeather(weather){
     //Rain
 	sendEvent(name: "precip_today", value: weather.dailyrainin, unit: 'in', isStateChange: true);
 	sendEvent(name: "precip_1hr", value: weather.hourlyrainin, unit: 'in', isStateChange: true);
-	sendEvent(name: "weekly_rain_in", value: weather.weeklyrainin, unit: 'in', isStateChange: true);
-	sendEvent(name: "monthly_rain_in", value: weather.monthlyrainin, unit: 'in', isStateChange: true);
-	sendEvent(name: "total_rain_in", value: weather.totalrainin, unit: 'in', isStateChange: true);
-	sendEvent(name: "hourly_rain_in", value: weather.hourlyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "weeklyrainin", value: weather.weeklyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "monthlyrainin", value: weather.monthlyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "totalrainin", value: weather.totalrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "hourlyrainin", value: weather.hourlyrainin, unit: 'in', isStateChange: true);
 	sendEvent(name: "lastRain",  value: weather.lastRain, isStateChange: true);
 
 	//Wind
