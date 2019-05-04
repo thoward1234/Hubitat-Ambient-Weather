@@ -6,32 +6,43 @@ metadata {
         capability "Illuminance Measurement"
         capability "Refresh"
         capability "Sensor"
-		capability "Actuator"
+	capability "Actuator"
         
-		//Current Conditions
+	//Current Conditions
         attribute "weather", "string"
         attribute "weatherIcon", "string"
         attribute "dewPoint", "number"
         attribute "comfort", "number"
         attribute "feelsLike", "number"
-		attribute "pressure", "string"
+	attribute "pressure", "string"
 		
-		//Precipitation
+	//Indoor Conditions
+	attribute "humidityin", "string"
+	attribute "tempinf", "string"
+	attribute "baromabsin", "number"
+		
+	//Precipitation
         attribute "precip_today", "number"
-		attribute "precip_1hr", "number"
-		
-        
-		//Wind
-		attribute "wind", "number"
+	attribute "precip_1hr", "number"
+	attribute "hourlyrainin", "number"
+	attribute "weeklyrainin", "number"
+	attribute "monthlyrainin", "number"
+        attribute "totalrainin", "number"
+	attribute "lastRain", "string"
+                
+	//Wind
+	attribute "wind", "number"
         attribute "wind_gust", "number"
+        attribute "maxdailygust", "number"
         attribute "wind_degree", "number"
         attribute "wind_dir", "string"
-		attribute "wind_direction", "string"
+	attribute "wind_direction", "string"
 		
-		//Light
-		attribute "solarradiation", "number"
+	//Light
+	attribute "solarradiation", "number"
         attribute "uv", "number"
     }
+
 	preferences {
         section("Preferences") {
             input "showLogs", "bool", required: false, title: "Show Debug Logs?", defaultValue: false
@@ -46,11 +57,17 @@ def refresh() {
 def setWeather(weather){
 	logger("debug", "Weather: "+weather);
 	
-	//Set temperature
+	//Set outdoor temperature
 	sendEvent(name: "temperature", value: weather.tempf, unit: '°F', isStateChange: true);
 	
+	//Set Indoor temperature
+	sendEvent(name: "indoor_temperature", value: weather.tempinf, unit: '°F', isStateChange: true);
+
 	//Set Humidity
 	sendEvent(name: "humidity", value: weather.humidity, unit: '%', isStateChange: true);
+    
+	//Set Indoor Humidity
+	sendEvent(name: "indoor_humidity", value: weather.humidityin, unit: '%', isStateChange: true);
     
 	//Set DewPoint
 	sendEvent(name: "dewPoint", value: weather.dewPoint, unit:'°F', isStateChange: true);
@@ -72,16 +89,25 @@ def setWeather(weather){
 	//Set Barometric Pressure
 	sendEvent(name: "pressure", value: weather.baromrelin, unit: 'in', isStateChange: true);
 	
+	//Set Indoor Barometric Pressure
+	sendEvent(name: "indoor_pressure", value: weather.baromabsin, unit: 'in', isStateChange: true);
+	
 	//Set Feels Like Temperature
 	sendEvent(name: "feelsLike", value: weather.feelsLike, unit: '°F', isStateChange: true);
     
     //Rain
-	sendEvent(name: "precip_today", value: weather.dailyrainin, unit: 'in', isStateChange: true);  
-	sendEvent(name: "precip_1hr", value: weather.hourlyrainin, unit: 'in', isStateChange: true); 
-	
+	sendEvent(name: "precip_today", value: weather.dailyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "precip_1hr", value: weather.hourlyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "weekly_rain_in", value: weather.weeklyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "monthly_rain_in", value: weather.monthlyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "total_rain_in", value: weather.totalrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "hourly_rain_in", value: weather.hourlyrainin, unit: 'in', isStateChange: true);
+	sendEvent(name: "lastRain",  value: weather.lastRain, isStateChange: true);
+
 	//Wind
 	sendEvent(name: "wind", value: weather.windspeedmph, unit: 'mph', isStateChange: true);
 	sendEvent(name: "wind_gust", value: weather.windgustmph, unit: 'mph', isStateChange: true);
+	sendEvent(name: "maxdailygust", value: weather.maxdailygust, unit: 'mph', isStateChange: true);
 	sendEvent(name: "wind_degree", value: weather.winddir, unit: '°', isStateChange: true);
 	
 	temp = weather.winddir
@@ -108,7 +134,7 @@ def setWeather(weather){
 	//UV and Light
 	sendEvent(name: "solarradiation", value: weather.solarradiation, isStateChange: true);
 	sendEvent(name: "illuminance", value: weather.solarradiation, isStateChange: true);
-        sendEvent(name: "uv", value: weather.uv, isStateChange: true);
+	sendEvent(name: "uv", value: weather.uv, isStateChange: true);
 }
 
 private logger(type, msg){
@@ -116,4 +142,3 @@ private logger(type, msg){
         log."${type}" "${msg}"
     }
 }
-	
